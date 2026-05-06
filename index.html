@@ -1,0 +1,566 @@
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --navy:#2A2755;--purple:#7B6EA6;--pink:#D4A5B5;--pink-light:#F0D9E2;
+  --gray1:#1C1C1E;--gray2:#636363;--gray3:#8A8796;--gray4:#C2C0CC;--gray5:#F1F0F5;
+  --white:#FFFFFF;--surface:#F5F4F8;--font:-apple-system,BlinkMacSystemFont,'SF Pro Text',sans-serif;
+  --bg:#FFFFFF;--bg2:#F5F4F8;--card:#FFFFFF;
+  --text1:#1C1C1E;--text2:#636363;--text3:#8A8796;--border:#C2C0CC;
+  --header-bg:#2A2755;--nav-bg:#FFFFFF;--nav-border:#C2C0CC;
+  --stat-bg:#FFFFFF;--input-bg:#FFFFFF;--chip-bg:#F5F4F8
+}
+.dm{
+  --bg:#0E0D1A;--bg2:#1A1828;--card:#1E1C2E;
+  --text1:#F0EFF8;--text2:#B0ADC8;--text3:#7A7890;--border:#3A3850;
+  --header-bg:#1A1828;--nav-bg:#1A1828;--nav-border:#3A3850;
+  --stat-bg:#2A2842;--input-bg:#252338;--chip-bg:#252338
+}
+.scene{display:flex;justify-content:center;padding:20px 0 28px}
+.iphone{width:320px;height:693px;background:#1A1A1A;border-radius:50px;padding:2px;box-shadow:0 0 0 1px #3a3a3a,inset 0 0 0 1px #555;flex-shrink:0}
+.iphone-inner{width:100%;height:100%;background:var(--bg);border-radius:48px;overflow:hidden;display:flex;flex-direction:column;transition:background .3s}
+
+/* Notch: time left, nothing right */
+.notch-bar{background:var(--header-bg);height:44px;flex-shrink:0;display:flex;align-items:flex-end;justify-content:space-between;padding:0 18px 7px;position:relative;transition:background .3s}
+.notch-cutout{position:absolute;top:0;left:50%;transform:translateX(-50%);width:120px;height:30px;background:#1A1A1A;border-radius:0 0 20px 20px}
+.n-time{color:rgba(255,255,255,.9);font-size:12px;font-weight:600;font-family:var(--font);z-index:1}
+
+.app-shell{flex:1;display:flex;flex-direction:column;overflow:hidden;min-height:0;background:var(--bg2);transition:background .3s}
+.screen{display:none;flex:1;flex-direction:column;min-height:0;overflow:hidden}
+.screen.active{display:flex}
+
+/* Header: logo+sub on left, profile icon on right — same row */
+.hdr{background:var(--header-bg);padding:14px 16px 18px;flex-shrink:0;transition:background .3s}
+.hdr-main-row{display:flex;justify-content:space-between;align-items:flex-start}
+.hdr-text{display:flex;flex-direction:column}
+.hdr-logo{font-family:Georgia,serif;font-style:italic;font-size:20px;color:#fff;letter-spacing:.5px;margin-bottom:2px}
+.hdr-sub{font-size:11px;color:rgba(255,255,255,.5)}
+.hdr-profile{background:rgba(255,255,255,.15);border:1.5px solid rgba(255,255,255,.3);border-radius:50%;width:28px;height:28px;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;margin-top:2px}
+.hdr-nav-row{display:flex;justify-content:space-between;align-items:center}
+.hdr-back{background:none;border:none;color:rgba(255,255,255,.65);font-size:20px;cursor:pointer;padding:0;line-height:1;font-family:var(--font)}
+
+.content{flex:1;overflow-y:auto;overflow-x:hidden;padding:13px 13px 8px;-webkit-overflow-scrolling:touch;min-height:0;background:var(--bg2);transition:background .3s}
+.content::-webkit-scrollbar{width:0}
+
+.card{background:var(--card);border-radius:14px;border:.5px solid var(--border);padding:12px 13px;margin-bottom:10px;transition:background .3s,border-color .3s}
+.ctitle{font-size:12px;font-weight:600;color:var(--navy);margin-bottom:10px;font-family:var(--font)}
+.dm .ctitle{color:#AFA9EC}
+
+.stat-row{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.sbox{background:var(--stat-bg);border-radius:10px;border:.5px solid var(--border);padding:9px 6px;text-align:center;transition:background .3s,border-color .3s}
+.sicon{width:26px;height:26px;border-radius:50%;margin:0 auto 6px;display:flex;align-items:center;justify-content:center;font-size:13px}
+.slbl{font-size:9px;color:var(--text3);margin-bottom:3px;font-family:var(--font)}
+.sval{font-size:19px;font-weight:700;color:var(--navy);font-family:var(--font)}
+.dm .sval{color:#AFA9EC}
+
+.mood-row{display:flex;gap:5px;flex-wrap:wrap}
+.mc{border-radius:20px;padding:4px 9px;font-size:10px;font-weight:500;border:none;font-family:var(--font)}
+.mj{background:#FFF3C4;color:#7A5800}.mf{background:#EDE9F8;color:#3E2E8A}
+.mp{background:#D4EFE4;color:#155A38}.ma{background:#FFE0E0;color:#8A1A1A}
+.mw{background:#E0ECFF;color:#1A3278}.ms{background:#D8E8F8;color:#1A3E64}
+
+.eitem{padding:9px 0;border-bottom:.5px solid var(--border);cursor:pointer;transition:border-color .3s}
+.eitem:last-child{border-bottom:none}
+.emeta{display:flex;align-items:center;gap:5px;margin-bottom:3px}
+.edot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+.edate{font-size:9px;color:var(--text3);font-family:var(--font)}
+.etitle{font-size:12px;font-weight:600;color:var(--text1);margin-bottom:2px;font-family:var(--font)}
+.eprev{font-size:10px;color:var(--text3);line-height:1.5;font-family:var(--font)}
+
+.pill{display:inline-flex;align-items:center;padding:2px 8px;border-radius:20px;font-size:9px;font-weight:600;font-family:var(--font)}
+.ppu{background:#EDE9F8;color:#3E2E8A}.ppk{background:#F8E9EE;color:#7A2A46}
+.pnv{background:#E8E9F2;color:#2A2755}.pgr{background:#D4EFE4;color:#155A38}
+
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px}
+.cdow{font-size:9px;color:var(--text3);text-align:center;padding:2px 0;font-weight:600;font-family:var(--font)}
+.cday{aspect-ratio:1;display:flex;align-items:center;justify-content:center;font-size:10px;color:var(--text2);cursor:pointer;font-family:var(--font);border-radius:50%}
+.cday.he{color:#fff;font-weight:700;border-radius:45%;transform:scale(0.9)}
+.cday.joy{background:#E8C84A}.cday.fear{background:#7B6EA6}
+.cday.peace{background:#4AA882}.cday.anx{background:#D4607A}
+.cday.wond{background:#4A88CC}.cday.tod{box-shadow:0 0 0 1.5px var(--purple)}
+.cal-legend{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px;padding-top:8px;border-top:.5px solid var(--border)}
+.li{display:flex;align-items:center;gap:3px;font-size:9px;color:var(--text3);font-family:var(--font)}
+.ld{width:6px;height:6px;border-radius:50%}
+
+.flbl{font-size:10px;font-weight:700;color:var(--text2);margin-bottom:5px;display:block;letter-spacing:.3px;text-transform:uppercase;font-family:var(--font)}
+.finp{width:100%;border:.5px solid var(--border);border-radius:9px;padding:8px 11px;font-size:12px;color:var(--text1);font-family:var(--font);background:var(--input-bg);outline:none;transition:background .3s,border-color .3s,color .3s}
+.finp:focus{border-color:var(--purple)}
+textarea.finp{resize:none;line-height:1.55}
+.fsec{margin-bottom:14px}
+
+.tgrid{display:flex;flex-wrap:wrap;gap:5px}
+.tag{border:.5px solid var(--border);border-radius:20px;padding:5px 11px;font-size:10px;color:var(--text2);cursor:pointer;background:var(--input-bg);font-family:var(--font);user-select:none;transition:background .2s,color .2s,border-color .2s}
+.tag.sel{background:var(--navy);color:#fff;border-color:var(--navy)}
+.dm .tag.sel{background:#534AB7;border-color:#534AB7}
+
+.slrow{display:flex;align-items:center;gap:8px}
+.send{font-size:9px;color:var(--text3);font-family:var(--font)}
+.sval2{font-size:13px;font-weight:700;color:var(--navy);min-width:18px;text-align:right;font-family:var(--font)}
+.dm .sval2{color:#AFA9EC}
+input[type=range]{flex:1;-webkit-appearance:none;height:3px;border-radius:2px;background:var(--border);outline:none;cursor:pointer}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:var(--navy);cursor:pointer;border:2px solid var(--bg);box-shadow:0 1px 3px rgba(42,39,85,.25)}
+.dm input[type=range]::-webkit-slider-thumb{background:#7B6EA6}
+
+/* Primary buttons — dark purple (navy) */
+.bprim{width:100%;background:var(--navy);color:#fff;border:none;border-radius:12px;padding:13px;font-size:13px;font-weight:700;cursor:pointer;font-family:var(--font);transition:opacity .15s}
+.bprim:hover{opacity:.88}
+.bprim:active{transform:scale(.98)}
+.dm .bprim{background:#534AB7;color:#F0EFF8}
+
+.bsec{width:100%;background:transparent;color:var(--text2);border:.5px solid var(--border);border-radius:12px;padding:12px;font-size:13px;font-weight:600;cursor:pointer;font-family:var(--font);margin-top:7px}
+
+.fchip{display:inline-flex;align-items:center;padding:5px 10px;border-radius:20px;background:var(--chip-bg);font-size:10px;color:var(--text2);margin:3px;cursor:pointer;border:.5px solid var(--border);font-family:var(--font);user-select:none;transition:background .2s,color .2s}
+.fchip.on{background:var(--purple);color:#fff;border-color:var(--purple)}
+.oiwrap{margin-top:6px;display:none}
+.oiwrap.vis{display:block}
+
+.nav-bar{background:var(--nav-bg);border-top:.5px solid var(--nav-border);display:flex;padding:8px 0 18px;flex-shrink:0;transition:background .3s,border-color .3s}
+.nitem{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;padding:3px 0;border:none;background:none;font-family:var(--font)}
+.nico{width:22px;height:22px;display:flex;align-items:center;justify-content:center}
+.nico svg{color:var(--text3)}
+.nlbl{font-size:9px;color:var(--text3);font-family:var(--font)}
+.nitem.active .nlbl{color:var(--purple);font-weight:700}
+.nitem.active .nico svg{color:var(--purple)}
+.nfab{width:38px;height:38px;border-radius:50%;background:var(--navy);display:flex;align-items:center;justify-content:center;margin-top:-10px}
+.dm .nfab{background:#534AB7}
+
+.secnav{display:flex;background:var(--chip-bg);border-radius:9px;padding:2px;margin-bottom:12px}
+.sbtn{flex:1;border:none;background:none;border-radius:7px;padding:6px;font-size:10px;color:var(--text3);cursor:pointer;font-family:var(--font)}
+.sbtn.active{background:var(--navy);color:#fff;font-weight:700}
+.dm .sbtn.active{background:#534AB7}
+
+.cwrap{height:80px;position:relative;margin:6px 0}
+.clbls{display:flex;justify-content:space-between;font-size:9px;color:var(--text3);font-family:var(--font)}
+.fbrow{display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:.5px solid var(--border)}
+.fbrow:last-child{border-bottom:none}
+.fbn{font-size:11px;color:var(--text1);font-family:var(--font)}
+.fbt{width:56px;height:4px;background:var(--chip-bg);border-radius:2px;overflow:hidden}
+.fbf{height:100%;border-radius:2px;background:var(--purple)}
+.fbp{font-size:9px;color:var(--text3);min-width:24px;text-align:right;font-family:var(--font)}
+.mgrid{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:10px}
+.srch{flex:1;border:.5px solid var(--border);border-radius:20px;padding:7px 13px;font-size:11px;font-family:var(--font);background:var(--input-bg);color:var(--text1);outline:none}
+.hi{height:4px;width:100px;background:var(--text1);border-radius:2px;margin:6px auto 2px;opacity:.15;flex-shrink:0}
+.tgl{width:38px;height:22px;border-radius:11px;background:var(--gray4);position:relative;cursor:pointer;transition:background .25s;flex-shrink:0;border:none}
+.tgl.on{background:var(--purple)}
+.tthumb{position:absolute;top:3px;left:3px;width:16px;height:16px;border-radius:50%;background:#fff;transition:transform .25s;pointer-events:none}
+.tgl.on .tthumb{transform:translateX(16px)}
+.avatar{width:48px;height:48px;border-radius:50%;background:var(--purple);display:flex;align-items:center;justify-content:center;font-size:16px;margin:0 auto 8px;color:#fff;font-family:var(--font);font-weight:700}
+.srow{display:flex;justify-content:space-between;align-items:center;padding:11px 0;border-bottom:.5px solid var(--border)}
+.srow:last-child{border-bottom:none}
+.slb{font-size:13px;color:var(--text1);font-family:var(--font)}
+.ssub{font-size:10px;color:var(--text3);font-family:var(--font);margin-top:1px}
+.swrap{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px 24px;text-align:center}
+</style>
+
+<div class="scene">
+<div class="iphone">
+<div class="iphone-inner" id="root">
+
+  <!-- Notch: time only, no profile icon here -->
+  <div class="notch-bar">
+    <div class="notch-cutout"></div>
+    <span class="n-time">9:41</span>
+    <div style="width:26px"></div>
+  </div>
+
+  <div class="app-shell">
+
+    <!-- DASHBOARD -->
+    <div id="s-dash" class="screen active">
+      <div class="hdr">
+        <!-- Profile icon on same row as title -->
+        <div class="hdr-main-row">
+          <div class="hdr-text">
+            <div class="hdr-logo">Dream Log</div>
+            <div class="hdr-sub">April 2026</div>
+          </div>
+          <button class="hdr-profile" onclick="openSettings()">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+              <circle cx="7" cy="5" r="2.5" stroke="white" stroke-width="1.3"/>
+              <path d="M2 12c0-2.8 2.2-4.5 5-4.5s5 1.7 5 4.5" stroke="white" stroke-width="1.3" fill="none" stroke-linecap="round"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+      <div class="content">
+        <div class="card">
+          <div class="ctitle">Stats</div>
+          <div class="stat-row">
+            <div class="sbox"><div class="sicon" style="background:#EDE9F8">📓</div><div class="slbl">Entries</div><div class="sval" style="color:var(--purple)">29</div></div>
+            <div class="sbox"><div class="sicon" style="background:#E8E9F2">🌙</div><div class="slbl">Nights</div><div class="sval">22</div></div>
+            <div class="sbox"><div class="sicon" style="background:#F8E9EE">∞</div><div class="slbl">Recurring</div><div class="sval" style="color:#C06080">8</div></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="ctitle">Stress this week</div>
+          <div class="cwrap">
+            <svg width="100%" height="80" viewBox="0 0 270 80" preserveAspectRatio="none">
+              <line x1="8" y1="8" x2="8" y2="70" stroke="#E0DEEA" stroke-width="0.5"/>
+              <line x1="8" y1="70" x2="262" y2="70" stroke="#E0DEEA" stroke-width="0.5"/>
+              <polyline points="18,56 55,46 92,60 130,40 168,30 206,48 244,36" fill="none" stroke="#7B6EA6" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round"/>
+              <circle cx="18" cy="56" r="3" fill="#7B6EA6"/><circle cx="55" cy="46" r="3" fill="#7B6EA6"/>
+              <circle cx="92" cy="60" r="3" fill="#7B6EA6"/><circle cx="130" cy="40" r="3" fill="#7B6EA6"/>
+              <circle cx="168" cy="30" r="3.5" fill="#2A2755"/><circle cx="206" cy="48" r="3" fill="#7B6EA6"/><circle cx="244" cy="36" r="3" fill="#7B6EA6"/>
+            </svg>
+          </div>
+          <div class="clbls"><span>S</span><span>M</span><span>T</span><span>W</span><span>T</span><span>F</span><span>S</span></div>
+        </div>
+        <div class="card">
+          <div class="ctitle">Moods this month</div>
+          <div class="mood-row">
+            <span class="mc mp">Peace</span><span class="mc mw">Wonder</span><span class="mc ma">Anxiety</span>
+            <span class="mc mj">Joy</span><span class="mc mf">Fear</span><span class="mc ms">Sadness</span>
+          </div>
+        </div>
+        <div class="card" style="padding:12px 13px 4px">
+          <div class="ctitle">Recent entries</div>
+          <div class="eitem" onclick="openEntry()"><div class="emeta"><span class="edot" style="background:#7B6EA6"></span><span class="edate">Apr 19</span><span class="pill ppu">Lucid</span></div><div class="etitle">Ninjas at the mall</div><div class="eprev">A vast shopping centre filled with shadows...</div></div>
+          <div class="eitem" onclick="openEntry()"><div class="emeta"><span class="edot" style="background:#4A88CC"></span><span class="edate">Apr 18</span><span class="pill pnv">Recurring</span></div><div class="etitle">Hanging w/ Justin Bieber</div><div class="eprev">Rooftop studio, impossible violet sky...</div></div>
+          <div class="eitem" onclick="openEntry()"><div class="emeta"><span class="edot" style="background:#D4607A"></span><span class="edate">Apr 17</span><span class="pill ppk">Nightmare</span></div><div class="etitle">Stressful test</div><div class="eprev">Late to an exam, hallways kept shifting...</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CALENDAR -->
+    <div id="s-cal" class="screen">
+      <div class="hdr"><div class="hdr-nav-row"><button class="hdr-back">‹</button><div style="text-align:center"><div class="hdr-logo" style="font-size:18px">Calendar</div><div class="hdr-sub">April 2026</div></div><button class="hdr-back">›</button></div></div>
+      <div class="content">
+        <div class="card">
+          <div class="cal-grid">
+            <div class="cdow">S</div><div class="cdow">M</div><div class="cdow">T</div><div class="cdow">W</div><div class="cdow">T</div><div class="cdow">F</div><div class="cdow">S</div>
+            <div class="cday"></div><div class="cday"></div><div class="cday">1</div>
+            <div class="cday wond he">2</div><div class="cday peace he">3</div><div class="cday joy he">4</div><div class="cday">5</div>
+            <div class="cday joy he">6</div><div class="cday">7</div><div class="cday peace he">8</div>
+            <div class="cday wond he">9</div><div class="cday fear he">10</div><div class="cday">11</div><div class="cday anx he">12</div>
+            <div class="cday">13</div><div class="cday peace he">14</div><div class="cday joy he">15</div>
+            <div class="cday">16</div><div class="cday wond he">17</div><div class="cday anx he">18</div>
+            <div class="cday fear he tod" onclick="toggleCalPreview()">19</div>
+            <div class="cday">20</div><div class="cday joy he">21</div><div class="cday">22</div>
+            <div class="cday peace he">23</div><div class="cday">24</div><div class="cday wond he">25</div><div class="cday">26</div>
+            <div class="cday anx he">27</div><div class="cday">28</div><div class="cday joy he">29</div><div class="cday">30</div>
+          </div>
+          <div class="cal-legend">
+            <div class="li"><div class="ld" style="background:#E8C84A"></div>Joy</div>
+            <div class="li"><div class="ld" style="background:#7B6EA6"></div>Fear</div>
+            <div class="li"><div class="ld" style="background:#4AA882"></div>Peace</div>
+            <div class="li"><div class="ld" style="background:#D4607A"></div>Anxiety</div>
+            <div class="li"><div class="ld" style="background:#4A88CC"></div>Wonder</div>
+          </div>
+        </div>
+        <div id="cal-preview" class="card" style="display:none">
+          <div class="ctitle">Apr 19 — Ninjas at the mall</div>
+          <div style="display:flex;gap:5px;margin-bottom:8px"><span class="pill ppu">Lucid</span><span class="pill ppk">Fear</span></div>
+          <div style="font-size:11px;color:var(--text2);line-height:1.65;margin-bottom:8px;font-family:var(--font)">A vast shopping centre filled with shadows. I knew I was dreaming but couldn't wake up.</div>
+          <div style="font-size:9px;color:var(--text3);font-family:var(--font)">Stress: 7/10 · Clarity: 8/10</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- LOG DREAM -->
+    <div id="s-log" class="screen">
+      <div class="hdr"><div class="hdr-logo">Log a dream</div><div class="hdr-sub" id="log-step-label">Step 1 of 2 — Dream details</div></div>
+      <div class="content" id="log-s1">
+        <div class="fsec"><label class="flbl">Description <span style="color:#D4607A">*</span></label><textarea class="finp" rows="3" placeholder="Describe your dream..."></textarea></div>
+        <div class="fsec">
+          <label class="flbl">Emotions <span style="color:#D4607A">*</span></label>
+          <div class="tgrid">
+            <span class="tag" onclick="this.classList.toggle('sel')">Joy</span>
+            <span class="tag sel" onclick="this.classList.toggle('sel')">Fear</span>
+            <span class="tag" onclick="this.classList.toggle('sel')">Sadness</span>
+            <span class="tag" onclick="this.classList.toggle('sel')">Confusion</span>
+            <span class="tag" onclick="this.classList.toggle('sel')">Excitement</span>
+            <span class="tag" onclick="this.classList.toggle('sel')">Anxiety</span>
+            <span class="tag" onclick="this.classList.toggle('sel')">Peace</span>
+            <span class="tag" onclick="this.classList.toggle('sel')">Anger</span>
+            <span class="tag" onclick="this.classList.toggle('sel')">Wonder</span>
+            <span class="tag" onclick="this.classList.toggle('sel')">Nostalgia</span>
+          </div>
+        </div>
+        <div class="fsec">
+          <label class="flbl">Stress level <span style="color:#D4607A">*</span></label>
+          <div class="slrow"><span class="send">0</span><input type="range" min="0" max="10" value="6" step="1" oninput="document.getElementById('sv').textContent=this.value"><span class="send">10</span><span class="sval2" id="sv">6</span></div>
+        </div>
+        <div class="fsec"><label class="flbl">Title <span style="color:var(--text3);font-weight:400;text-transform:none">(optional)</span></label><input type="text" class="finp" placeholder="e.g. Ninjas at the mall"></div>
+        <div class="fsec">
+          <label class="flbl">Dream type <span style="color:var(--text3);font-weight:400;text-transform:none">(optional — multi-select)</span></label>
+          <div class="tgrid">
+            <span class="tag sel" onclick="this.classList.toggle('sel')">Lucid</span>
+            <span class="tag" onclick="this.classList.toggle('sel')">Nightmare</span>
+            <span class="tag" onclick="this.classList.toggle('sel')">Recurring</span>
+            <span class="tag" onclick="this.classList.toggle('sel')">Vivid</span>
+          </div>
+        </div>
+        <div class="fsec">
+          <label class="flbl">Clarity <span style="color:var(--text3);font-weight:400;text-transform:none">(optional)</span></label>
+          <div class="slrow"><span class="send">0</span><input type="range" min="0" max="10" value="8" step="1" oninput="document.getElementById('cv').textContent=this.value"><span class="send">10</span><span class="sval2" id="cv">8</span></div>
+        </div>
+        <!-- Relabeled and dark purple -->
+        <button class="bprim" onclick="goStep2()">Next: Pre-sleep factors</button>
+      </div>
+      <div class="content" id="log-s2" style="display:none">
+        <div class="fsec">
+          <label class="flbl">Activities yesterday</label>
+          <div>
+            <span class="fchip on" onclick="this.classList.toggle('on')">Exercise</span>
+            <span class="fchip" onclick="this.classList.toggle('on')">Walk</span>
+            <span class="fchip" onclick="this.classList.toggle('on')">Yoga</span>
+            <span class="fchip" onclick="this.classList.toggle('on')">Social event</span>
+            <span class="fchip" onclick="this.classList.toggle('on')">Travel</span>
+            <span class="fchip" onclick="this.classList.toggle('on')">Work</span>
+            <span class="fchip" id="other-chip" onclick="toggleOther(this)">Other</span>
+          </div>
+          <div class="oiwrap" id="other-wrap"><input type="text" class="finp" placeholder="Describe the activity..."></div>
+        </div>
+        <div class="fsec">
+          <label class="flbl">Food &amp; substances</label>
+          <div>
+            <span class="fchip" onclick="this.classList.toggle('on')">Alcohol</span>
+            <span class="fchip on" onclick="this.classList.toggle('on')">Caffeine</span>
+            <span class="fchip" onclick="this.classList.toggle('on')">Heavy meal</span>
+            <span class="fchip" onclick="this.classList.toggle('on')">Fasting</span>
+            <span class="fchip" onclick="this.classList.toggle('on')">Junk food</span>
+            <span class="fchip" onclick="this.classList.toggle('on')">Healthy foods</span>
+          </div>
+        </div>
+        <div class="fsec">
+          <label class="flbl">Media consumed</label>
+          <div>
+            <span class="fchip on" onclick="this.classList.toggle('on')">Horror film</span>
+            <span class="fchip" onclick="this.classList.toggle('on')">News</span>
+            <span class="fchip" onclick="this.classList.toggle('on')">Social media</span>
+            <span class="fchip" onclick="this.classList.toggle('on')">Book</span>
+            <span class="fchip" onclick="this.classList.toggle('on')">Video game</span>
+            <span class="fchip" onclick="this.classList.toggle('on')">Music</span>
+          </div>
+        </div>
+        <div class="fsec">
+          <label class="flbl">Screen time before bed</label>
+          <div class="tgrid" id="screen-tags">
+            <span class="tag" onclick="tSingle(this,'screen-tags')">None</span>
+            <span class="tag sel" onclick="tSingle(this,'screen-tags')">&lt;30 min</span>
+            <span class="tag" onclick="tSingle(this,'screen-tags')">30–60 min</span>
+            <span class="tag" onclick="tSingle(this,'screen-tags')">&gt;1 hr</span>
+          </div>
+        </div>
+        <div class="fsec"><label class="flbl">Notes <span style="color:var(--text3);font-weight:400;text-transform:none">(optional)</span></label><textarea class="finp" rows="2" placeholder="Anything else worth noting..."></textarea></div>
+        <!-- Dark purple save button -->
+        <button class="bprim" onclick="saveEntry()">Save dream entry</button>
+        <button class="bsec" onclick="backStep1()">← Back</button>
+      </div>
+    </div>
+
+    <!-- JOURNAL -->
+    <div id="s-journal" class="screen">
+      <div class="hdr"><div class="hdr-logo">Journal</div><div class="hdr-sub">19 entries this month</div></div>
+      <div class="content">
+        <div style="display:flex;margin-bottom:9px"><input class="srch" type="text" placeholder="Search dreams..."></div>
+        <div style="display:flex;gap:5px;margin-bottom:10px;flex-wrap:wrap">
+          <span class="pill ppu" style="cursor:pointer;padding:4px 10px">All</span>
+          <span class="pill" style="background:var(--chip-bg);color:var(--text3);cursor:pointer;padding:4px 10px">Lucid</span>
+          <span class="pill" style="background:var(--chip-bg);color:var(--text3);cursor:pointer;padding:4px 10px">Nightmare</span>
+          <span class="pill" style="background:var(--chip-bg);color:var(--text3);cursor:pointer;padding:4px 10px">Recurring</span>
+        </div>
+        <div class="card" style="padding:8px 13px 4px">
+          <div class="eitem" onclick="openEntry()"><div class="emeta"><span class="edot" style="background:#7B6EA6"></span><span class="edate">Apr 19</span><span class="pill ppu">Lucid</span></div><div class="etitle">Ninjas at the mall</div><div class="eprev">A vast shopping centre filled with shadows...</div></div>
+          <div class="eitem" onclick="openEntry()"><div class="emeta"><span class="edot" style="background:#4A88CC"></span><span class="edate">Apr 18</span><span class="pill pnv">Recurring</span></div><div class="etitle">Hanging w/ Justin Bieber</div><div class="eprev">Rooftop studio, impossible violet sky...</div></div>
+          <div class="eitem" onclick="openEntry()"><div class="emeta"><span class="edot" style="background:#D4607A"></span><span class="edate">Apr 17</span><span class="pill ppk">Nightmare</span></div><div class="etitle">Stressful test</div><div class="eprev">Late to an exam, hallways shifting...</div></div>
+          <div class="eitem" onclick="openEntry()"><div class="emeta"><span class="edot" style="background:#4AA882"></span><span class="edate">Apr 15</span><span class="pill pgr">Vivid</span></div><div class="etitle">Telekinesis</div><div class="eprev">I could move objects with a glance...</div></div>
+          <div class="eitem" onclick="openEntry()"><div class="emeta"><span class="edot" style="background:#E8C84A"></span><span class="edate">Apr 14</span><span class="pill ppu">Lucid</span></div><div class="etitle">Flying over the coast</div><div class="eprev">Warm air, the ocean far below...</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ENTRY DETAIL -->
+    <div id="s-entry" class="screen">
+      <div class="hdr"><div class="hdr-nav-row"><button class="hdr-back" onclick="closeEntry()">‹</button><div style="text-align:center"><div class="hdr-logo" style="font-size:16px">Apr 19</div><div class="hdr-sub">Ninjas at the mall</div></div><div style="width:28px"></div></div></div>
+      <div class="content">
+        <div style="display:flex;gap:5px;margin-bottom:10px"><span class="pill ppu">Lucid</span><span class="pill ppk">Fear</span><span class="pill pnv">Wonder</span></div>
+        <div class="card"><div style="font-size:12px;color:var(--text1);line-height:1.75;font-family:var(--font)">A vast shopping centre filled with shadows. Someone familiar was moving between the crowds — I knew who it was but couldn't name them. The escalators kept going but never arrived at another floor. I knew I was dreaming but couldn't force myself to wake up. Eventually the lights cut out and the building fell silent.</div></div>
+        <div class="card"><div class="ctitle">Metrics</div><div class="mgrid"><div class="sbox"><div class="slbl">Stress</div><div class="sval">7/10</div></div><div class="sbox"><div class="slbl">Clarity</div><div class="sval">8/10</div></div></div></div>
+        <div class="card">
+          <div class="ctitle">Pre-sleep factors</div>
+          <div style="margin-bottom:9px"><div style="font-size:9px;color:var(--text3);margin-bottom:5px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;font-family:var(--font)">Activities</div><span class="fchip on" style="cursor:default">Exercise</span></div>
+          <div style="margin-bottom:9px"><div style="font-size:9px;color:var(--text3);margin-bottom:5px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;font-family:var(--font)">Media</div><span class="fchip on" style="cursor:default">Horror film</span></div>
+          <div style="margin-bottom:9px"><div style="font-size:9px;color:var(--text3);margin-bottom:5px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;font-family:var(--font)">Food &amp; substances</div><span class="fchip on" style="cursor:default">Caffeine</span></div>
+          <div><div style="font-size:9px;color:var(--text3);margin-bottom:4px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;font-family:var(--font)">Screen time</div><div style="font-size:11px;color:var(--text2);font-family:var(--font)">&lt;30 min before bed</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SUMMARY -->
+    <div id="s-sum" class="screen">
+      <div class="hdr"><div class="hdr-logo">Summary</div><div class="hdr-sub">April 2026</div></div>
+      <div class="content">
+        <div class="secnav">
+          <button class="sbtn active" id="f-week" onclick="setFilter('week')">Week</button>
+          <button class="sbtn" id="f-month" onclick="setFilter('month')">Month</button>
+          <button class="sbtn" id="f-3mo" onclick="setFilter('3mo')">3 months</button>
+        </div>
+        <div class="mgrid">
+          <div class="sbox"><div class="slbl">Dreams logged</div><div class="sval" id="sum-count">7</div></div>
+          <div class="sbox"><div class="slbl">Avg stress</div><div class="sval" id="sum-stress">5.4</div></div>
+          <div class="sbox"><div class="slbl">Avg clarity</div><div class="sval" id="sum-clarity">7.1</div></div>
+          <div class="sbox"><div class="slbl">Top mood</div><div class="sval" style="font-size:13px;color:var(--purple)" id="sum-mood">Fear</div></div>
+        </div>
+        <div class="card">
+          <div class="ctitle">Stress over time</div>
+          <div class="cwrap">
+            <svg width="100%" height="80" viewBox="0 0 270 80" preserveAspectRatio="none">
+              <line x1="8" y1="8" x2="8" y2="70" stroke="#E0DEEA" stroke-width="0.5"/>
+              <line x1="8" y1="70" x2="262" y2="70" stroke="#E0DEEA" stroke-width="0.5"/>
+              <polyline points="18,56 55,46 92,60 130,40 168,30 206,48 244,36" fill="none" stroke="#7B6EA6" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round"/>
+              <circle cx="18" cy="56" r="3" fill="#7B6EA6"/><circle cx="55" cy="46" r="3" fill="#7B6EA6"/>
+              <circle cx="92" cy="60" r="3" fill="#7B6EA6"/><circle cx="130" cy="40" r="3" fill="#7B6EA6"/>
+              <circle cx="168" cy="30" r="3.5" fill="#2A2755"/><circle cx="206" cy="48" r="3" fill="#7B6EA6"/><circle cx="244" cy="36" r="3" fill="#7B6EA6"/>
+            </svg>
+          </div>
+          <div class="clbls" id="chart-labels"><span>S</span><span>M</span><span>T</span><span>W</span><span>T</span><span>F</span><span>S</span></div>
+        </div>
+        <div class="card">
+          <div class="ctitle">Top pre-sleep factors</div>
+          <div class="fbrow"><span class="fbn">Horror film</span><div style="display:flex;align-items:center;gap:6px"><div class="fbt"><div class="fbf" style="width:80%"></div></div><span class="fbp">80%</span></div></div>
+          <div class="fbrow"><span class="fbn">Caffeine</span><div style="display:flex;align-items:center;gap:6px"><div class="fbt"><div class="fbf" style="width:65%"></div></div><span class="fbp">65%</span></div></div>
+          <div class="fbrow"><span class="fbn">Exercise</span><div style="display:flex;align-items:center;gap:6px"><div class="fbt"><div class="fbf" style="width:50%;background:var(--pink)"></div></div><span class="fbp">50%</span></div></div>
+          <div class="fbrow"><span class="fbn">Social media</span><div style="display:flex;align-items:center;gap:6px"><div class="fbt"><div class="fbf" style="width:35%;background:var(--pink)"></div></div><span class="fbp">35%</span></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SETTINGS -->
+    <div id="s-settings" class="screen">
+      <div class="hdr"><div class="hdr-nav-row"><button class="hdr-back" onclick="closeSettings()">‹</button><div style="text-align:center"><div class="hdr-logo" style="font-size:18px">Settings</div></div><div style="width:28px"></div></div></div>
+      <div class="content">
+        <div style="text-align:center;padding:16px 0 20px">
+          <div class="avatar">DD</div>
+          <div style="font-size:14px;font-weight:700;color:var(--text1);font-family:var(--font)">Danielle Dacanay</div>
+          <div style="font-size:11px;color:var(--text3);font-family:var(--font);margin-top:2px">danielle@email.com</div>
+        </div>
+        <div class="card">
+          <div class="ctitle">Appearance</div>
+          <div class="srow"><div><div class="slb">Dark mode</div><div class="ssub">Switch to a darker theme</div></div><button class="tgl" id="dark-toggle" onclick="toggleDark(this)"><div class="tthumb"></div></button></div>
+        </div>
+        <div class="card">
+          <div class="ctitle">Notifications</div>
+          <div class="srow"><div><div class="slb">Morning reminder</div><div class="ssub">Log your dreams each day</div></div><button class="tgl on" onclick="this.classList.toggle('on')"><div class="tthumb"></div></button></div>
+          <div class="srow"><div><div class="slb">Weekly summary</div><div class="ssub">Review your week every Sunday</div></div><button class="tgl" onclick="this.classList.toggle('on')"><div class="tthumb"></div></button></div>
+        </div>
+        <div class="card">
+          <div class="ctitle">Data</div>
+          <div class="srow"><div class="slb">Export journal</div><div style="font-size:11px;color:var(--purple);font-family:var(--font);cursor:pointer">Export →</div></div>
+          <div class="srow"><div class="slb">Clear all entries</div><div style="font-size:11px;color:#D4607A;font-family:var(--font);cursor:pointer">Clear →</div></div>
+        </div>
+        <div class="card"><div class="srow"><div class="slb">App version</div><div style="font-size:11px;color:var(--text3);font-family:var(--font)">1.0.0</div></div></div>
+      </div>
+    </div>
+
+    <!-- SAVE SUCCESS -->
+    <div id="s-saved" class="screen">
+      <div class="swrap">
+        <div style="width:60px;height:60px;border-radius:50%;background:#EDE9F8;display:flex;align-items:center;justify-content:center;font-size:26px;margin-bottom:14px">🌙</div>
+        <div style="font-size:17px;font-weight:700;color:var(--text1);margin-bottom:7px;font-family:var(--font)">Dream logged</div>
+        <div style="font-size:12px;color:var(--text3);line-height:1.65;margin-bottom:22px;font-family:var(--font)">Your entry has been saved to your journal and calendar.</div>
+        <button class="bprim" style="width:auto;padding:12px 28px" onclick="navTo('dash')">Back to dashboard</button>
+      </div>
+    </div>
+
+    <!-- NAV BAR -->
+    <div class="nav-bar" id="main-nav">
+      <button class="nitem active" id="nav-dash" onclick="navTo('dash')">
+        <div class="nico"><svg width="20" height="20" viewBox="0 0 20 20" fill="none"><rect x="2" y="2" width="7" height="7" rx="1.5" fill="currentColor" opacity=".8"/><rect x="11" y="2" width="7" height="7" rx="1.5" fill="currentColor" opacity=".8"/><rect x="2" y="11" width="7" height="7" rx="1.5" fill="currentColor" opacity=".8"/><rect x="11" y="11" width="7" height="7" rx="1.5" fill="currentColor" opacity=".8"/></svg></div>
+        <span class="nlbl">Dashboard</span>
+      </button>
+      <button class="nitem" id="nav-cal" onclick="navTo('cal')">
+        <div class="nico"><svg width="20" height="20" viewBox="0 0 20 20" fill="none"><rect x="2.5" y="3.5" width="15" height="14" rx="2" stroke="currentColor" stroke-width="1.3" fill="none" opacity=".8"/><line x1="6" y1="2" x2="6" y2="5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" opacity=".8"/><line x1="14" y1="2" x2="14" y2="5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" opacity=".8"/><line x1="2.5" y1="8" x2="17.5" y2="8" stroke="currentColor" stroke-width="1" opacity=".5"/></svg></div>
+        <span class="nlbl">Calendar</span>
+      </button>
+      <button class="nitem" id="nav-log" onclick="navTo('log')">
+        <div class="nico" style="width:38px;height:38px;margin-top:-10px"><div class="nfab"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><line x1="8" y1="3" x2="8" y2="13" stroke="white" stroke-width="1.8" stroke-linecap="round"/><line x1="3" y1="8" x2="13" y2="8" stroke="white" stroke-width="1.8" stroke-linecap="round"/></svg></div></div>
+        <span class="nlbl">Log</span>
+      </button>
+      <button class="nitem" id="nav-journal" onclick="navTo('journal')">
+        <div class="nico"><svg width="20" height="20" viewBox="0 0 20 20" fill="none"><rect x="3" y="2" width="12" height="16" rx="2" stroke="currentColor" stroke-width="1.3" fill="none" opacity=".8"/><line x1="6" y1="7" x2="12" y2="7" stroke="currentColor" stroke-width="1" opacity=".6"/><line x1="6" y1="10" x2="12" y2="10" stroke="currentColor" stroke-width="1" opacity=".6"/><line x1="6" y1="13" x2="10" y2="13" stroke="currentColor" stroke-width="1" opacity=".6"/></svg></div>
+        <span class="nlbl">Journal</span>
+      </button>
+      <button class="nitem" id="nav-sum" onclick="navTo('sum')">
+        <div class="nico"><svg width="20" height="20" viewBox="0 0 20 20" fill="none"><polyline points="3,15 7,10 10,12 14,6 17,8" stroke="currentColor" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round" opacity=".8"/></svg></div>
+        <span class="nlbl">Summary</span>
+      </button>
+    </div>
+    <div class="hi"></div>
+
+  </div>
+</div>
+</div>
+</div>
+
+<script>
+var prevScreen='dash';
+var isDark=false;
+
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(function(s){s.classList.remove('active');});
+  var s=document.getElementById('s-'+id);
+  if(s)s.classList.add('active');
+}
+function setNavActive(id){
+  document.querySelectorAll('.nitem').forEach(function(n){n.classList.remove('active');});
+  var n=document.getElementById('nav-'+id);
+  if(n)n.classList.add('active');
+}
+function navTo(id){
+  showScreen(id);setNavActive(id);
+  if(id==='log'){
+    document.getElementById('log-s1').style.display='block';
+    document.getElementById('log-s2').style.display='none';
+    document.getElementById('log-step-label').textContent='Step 1 of 2 — Dream details';
+  }
+  prevScreen=id;
+}
+function openEntry(){showScreen('entry');setNavActive(prevScreen);}
+function closeEntry(){showScreen(prevScreen||'dash');setNavActive(prevScreen||'dash');}
+function openSettings(){showScreen('settings');}
+function closeSettings(){showScreen(prevScreen||'dash');setNavActive(prevScreen||'dash');}
+function toggleCalPreview(){
+  var el=document.getElementById('cal-preview');
+  el.style.display=el.style.display==='none'?'block':'none';
+}
+function tSingle(el,gid){
+  document.getElementById(gid).querySelectorAll('.tag').forEach(function(t){t.classList.remove('sel');});
+  el.classList.add('sel');
+}
+function toggleOther(el){
+  el.classList.toggle('on');
+  document.getElementById('other-wrap').classList.toggle('vis',el.classList.contains('on'));
+}
+function goStep2(){
+  document.getElementById('log-s1').style.display='none';
+  document.getElementById('log-s2').style.display='block';
+  document.getElementById('log-step-label').textContent='Step 2 of 2 — Pre-sleep factors';
+}
+function backStep1(){
+  document.getElementById('log-s2').style.display='none';
+  document.getElementById('log-s1').style.display='block';
+  document.getElementById('log-step-label').textContent='Step 1 of 2 — Dream details';
+}
+function saveEntry(){showScreen('saved');}
+function toggleDark(btn){
+  isDark=!isDark;
+  btn.classList.toggle('on',isDark);
+  document.getElementById('root').classList.toggle('dm',isDark);
+}
+var fd={
+  week:{count:'7',stress:'5.4',clarity:'7.1',mood:'Fear',labels:['S','M','T','W','T','F','S']},
+  month:{count:'29',stress:'6.2',clarity:'7.8',mood:'Peace',labels:['W1','','W2','','W3','','W4']},
+  '3mo':{count:'74',stress:'5.9',clarity:'7.3',mood:'Wonder',labels:['Feb','','Mar','','Apr','',' ']}
+};
+function setFilter(f){
+  document.querySelectorAll('.sbtn').forEach(function(b){b.classList.remove('active');});
+  document.getElementById('f-'+f).classList.add('active');
+  var d=fd[f];
+  document.getElementById('sum-count').textContent=d.count;
+  document.getElementById('sum-stress').textContent=d.stress;
+  document.getElementById('sum-clarity').textContent=d.clarity;
+  document.getElementById('sum-mood').textContent=d.mood;
+  document.getElementById('chart-labels').innerHTML=d.labels.map(function(l){return'<span>'+l+'</span>';}).join('');
+}
+</script>
